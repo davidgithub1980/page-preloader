@@ -1,0 +1,24 @@
+{
+  "name": "page-preloader",
+  "version": "1.1.8",
+  "description": "Preload pages via web worker",
+  "main": "index.js",
+  "keywords": [
+    "preloader",
+    "loader",
+    "page"
+  ],
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "David Zaba",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/davidgithub1980/page-preloader.git"
+  },
+  "bugs": {
+    "url": "https://github.com/davidgithub1980/page-preloader/issues"
+  },
+  "homepage": "https://github.com/davidgithub1980/page-preloader#readme"
+}
