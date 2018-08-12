@@ -29,6 +29,9 @@ export const PagePreloader = {
       let xhr = []
       let store = {}
 
+      let fingerprint = ''
+      let fingerprintTicks = 0
+
       // state to represent that XHR is done
       const XHR_STATE_OK = 4
 
@@ -37,6 +40,7 @@ export const PagePreloader = {
         debug: false,
         preloadDelay: 2000,
         cacheDuration: 60000,
+        maxInactivityTicks: 20,
       }
 
       // extend options
@@ -51,6 +55,9 @@ export const PagePreloader = {
 
           return
         }
+
+        // we have a brand-new store so supervise it
+        !Object.keys(store || {}).length && supervisePagingData()
 
         let nextPage, prevPage
         let requestUrl
@@ -102,6 +109,25 @@ export const PagePreloader = {
           setTimeout(() => {
             options.debug && console.info('| > | PAGE PRELOADER | - trying to re-cache')
 
+            // store fingerprint to represent current state of the store
+            let newFingerprint = getFingerprint(store)
+
+            if (fingerprint !== newFingerprint) {
+              fingerprint = newFingerprint
+              fingerprintTicks = 0
+            } else {
+              fingerprintTicks++
+            }
+
+            //
+            if (fingerprintTicks > options.maxInactivityTicks) {
+              options.debug && console.info('| > | PAGE PRELOADER | - inactivity shutdown')
+              self.postMessage({ action: 'CLEAR_STORE' })
+              store = {}
+
+              return
+            }
+
             for (let endPoint in store) {
               let data = store[endPoint]
 
@@ -121,8 +147,6 @@ export const PagePreloader = {
           }, options.cacheDuration)
         })()
       }
-
-      supervisePagingData();
 
       /**
        *
@@ -186,6 +210,19 @@ export const PagePreloader = {
           return {}
         }
       }
+
+      /**
+       *
+       * @param store
+       * @return {*}
+       */
+      let getFingerprint = (store) => {
+        try {
+          return Object.keys(store).join('-')
+        } catch (e) {
+          return ''
+        }
+      }
     }
 
     try {
@@ -211,9 +248,15 @@ export const PagePreloader = {
     _worker.postMessage({ origin, apiEndpoint, store: window.__preloadedData });
 
     _worker.onmessage = (event) => {
-      let { target, endPoint, data, page, requestPage, loadTime } = event.data
+      if (event.data.action === 'CLEAR_STORE') {
+        window.__preloadedData = {}
 
-      window.__preloadedData[endPoint] = { data, target, page, requestPage, loadTime }
+        return
+      }
+
+      let { endPoint, requestPage } = event.data
+
+      window.__preloadedData[endPoint] = { ...event.data }
       window.__preloadedData = Utils.refreshPagingContext(requestPage, window.__preloadedData)
 
       _worker.postMessage({ action: 'RELOAD_STORE', store: window.__preloadedData })

@@ -25,9 +25,18 @@ PagePreloader.init()
 
 // use custom options
 PagePreloader.init({
-    debug: false, // debug mode
-    preloadDelay: 2000, // [ms] when to start preloading
-    cacheDuration: 60000, // [ms] when to request/refresh data
+    debug: false, 
+    // turn debug mode on/off
+    
+    preloadDelay: 2000, 
+    // [ms] when to start preloading following every page request
+    
+    cacheDuration: 60000,
+    // [ms] when to request/refresh data
+    
+    maxInactivityTicks: 20, 
+    // max attempts before shutdown
+    // one attempt/tick is recorded whenever preloaded history remains unchanged
 })
 
 // - provide current location + URL of the newly requested page
