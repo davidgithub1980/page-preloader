@@ -1,7 +1,7 @@
 import { Utils } from './utils'
 
 /**
- * Page Pre-loader
+ * Page Preloader
  * @author David Zaba
  *
  */
@@ -21,7 +21,7 @@ export const PagePreloader = {
    *
    */
   init(ops = {}) {
-    let wf = (ops) => {
+    let workerFn = (ops) => {
       // default request page
       let requestPage = 1
 
@@ -29,6 +29,7 @@ export const PagePreloader = {
       let xhr = []
       let store = {}
 
+      // state to represent that XHR is done
       const XHR_STATE_OK = 4
 
       // prep options
@@ -97,16 +98,28 @@ export const PagePreloader = {
        * Supervisor to keep data up-to-date
        */
       let supervisePagingData = () => {
-        setInterval(() => {
-          for (let endPoint in store) {
-            let data = store[endPoint]
+        (function _cache() {
+          setTimeout(() => {
+            options.debug && console.info('| > | PAGE PRELOADER | - trying to re-cache')
 
-            xhr[data.page] &&
-            xhr[data.page].readyState === XHR_STATE_OK &&
-            Date.now() - data.loadTime > options.cacheDuration &&
-            doXHR(data.target, endPoint, data.page, data.requestPage)
-          }
-        }, options.cacheDuration)
+            for (let endPoint in store) {
+              let data = store[endPoint]
+
+              let isRecacheable = (
+                xhr[data.page] &&
+                xhr[data.page].readyState === XHR_STATE_OK &&
+                Date.now() - data.loadTime > options.cacheDuration
+              )
+
+              if (isRecacheable) {
+                doXHR(data.target, endPoint, data.page, data.requestPage)
+                options.debug && console.info('| > | PAGE PRELOADER | - re-caching page ' + data.page)
+              }
+            }
+
+            _cache()
+          }, options.cacheDuration)
+        })()
       }
 
       supervisePagingData();
@@ -124,8 +137,7 @@ export const PagePreloader = {
         xhr[page].open('GET', target, true)
 
         xhr[page].onreadystatechange = () => {
-          xhr[page].readyState === XHR_STATE_OK &&
-          xhr[page].responseText &&
+          xhr[page].readyState === XHR_STATE_OK && xhr[page].responseText &&
           self.postMessage(buildResponse(page, target, endPoint, xhr[page].responseText))
         }
 
@@ -177,7 +189,7 @@ export const PagePreloader = {
     }
 
     // set up web worker
-    let blob = new Blob([`(${wf.toString()})(${JSON.stringify(ops)})`], {type: 'application/javascript'})
+    let blob = new Blob([`(${workerFn.toString()})(${JSON.stringify(ops)})`], {type: 'application/javascript'})
     _worker = new Worker(URL.createObjectURL(blob))
   },
 
