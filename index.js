@@ -188,9 +188,14 @@ export const PagePreloader = {
       }
     }
 
-    // set up web worker
-    let blob = new Blob([`(${workerFn.toString()})(${JSON.stringify(ops)})`], {type: 'application/javascript'})
-    _worker = new Worker(URL.createObjectURL(blob))
+    try {
+      // set up web worker
+      let blob = new Blob([`(${workerFn.toString()})(${JSON.stringify(ops)})`], {type: 'application/javascript'})
+      _worker = new Worker(URL.createObjectURL(blob))
+    } catch (e) {
+      console.info('| > | PAGE PRELOADER | - web-worker functionality not suppported')
+      _worker = null
+    }
   },
 
   /**
@@ -199,6 +204,10 @@ export const PagePreloader = {
    * @param apiEndpoint
    */
   query(origin, apiEndpoint) {
+    if (!_worker) {
+      return
+    }
+
     _worker.postMessage({ origin, apiEndpoint, store: window.__preloadedData });
 
     _worker.onmessage = (event) => {
