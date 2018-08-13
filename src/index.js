@@ -9,7 +9,13 @@ import { Utils } from './utils'
 // https://benohead.com/cross-domain-cross-browser-web-workers/
 // https://stackoverflow.com/questions/21408510/chrome-cant-load-web-worker#33432215
 
+// container to store preloaded data
 window.__preloadedData = {}
+
+// helpers
+let _Utils = new Utils()
+
+// main worker
 let _worker
 
 /**
@@ -21,7 +27,7 @@ export const PagePreloader = {
    *
    */
   init(ops = {}) {
-    let workerFn = (ops) => {
+    let workerFn = (ops, utils) => {
       // default request page
       let requestPage = 1
 
@@ -34,6 +40,9 @@ export const PagePreloader = {
 
       // state to represent that XHR is done
       const XHR_STATE_OK = 4
+
+      // helpers
+      utils = new utils()
 
       // prep options
       let options = {
@@ -110,7 +119,7 @@ export const PagePreloader = {
             options.debug && console.info('| > | PAGE PRELOADER | - trying to re-cache')
 
             // store fingerprint to represent current state of the store
-            let newFingerprint = getFingerprint(store)
+            let newFingerprint = utils.getFingerprint(store)
 
             if (fingerprint !== newFingerprint) {
               fingerprint = newFingerprint
@@ -210,24 +219,15 @@ export const PagePreloader = {
           return {}
         }
       }
-
-      /**
-       *
-       * @param store
-       * @return {*}
-       */
-      let getFingerprint = (store) => {
-        try {
-          return Object.keys(store).join('-')
-        } catch (e) {
-          return ''
-        }
-      }
     }
 
     try {
       // set up web worker
-      let blob = new Blob([`(${workerFn.toString()})(${JSON.stringify(ops)})`], {type: 'application/javascript'})
+      let blob = new Blob(
+        [`(${workerFn.toString()})(${JSON.stringify(ops)},${Utils.toString()})`],
+        {type: 'application/javascript'}
+      )
+
       _worker = new Worker(URL.createObjectURL(blob))
     } catch (e) {
       console.info('| > | PAGE PRELOADER | - web-worker functionality not suppported')
@@ -257,7 +257,7 @@ export const PagePreloader = {
       let { endPoint, requestPage } = event.data
 
       window.__preloadedData[endPoint] = { ...event.data }
-      window.__preloadedData = Utils.refreshPagingContext(requestPage, window.__preloadedData)
+      window.__preloadedData = _Utils.refreshPagingContext(requestPage, window.__preloadedData)
 
       _worker.postMessage({ action: 'RELOAD_STORE', store: window.__preloadedData })
     };

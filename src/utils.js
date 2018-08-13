@@ -4,9 +4,15 @@
  *
  */
 
-export const Utils = {
+export function Utils() {
 
-  refreshPagingContext(requestPage, data) {
+  /**
+   *
+   * @param requestPage
+   * @param data
+   * @return {{}}
+   */
+  this.refreshPagingContext = (requestPage, data) => {
     let newContent = {}
 
     for (let target in data) {
@@ -49,5 +55,18 @@ export const Utils = {
     }
 
     return newContent
-  },
+  }
+
+  /**
+   *
+   * @param store
+   * @return {*}
+   */
+  this.getFingerprint = (store) => {
+    try {
+      return Object.keys(store).join('-')
+    } catch (e) {
+      return ''
+    }
+  }
 }

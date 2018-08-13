@@ -15,6 +15,8 @@ npm install page-preloader
 
 ``` javascript
 import { PagePreloader } from 'page-preloader';
+// or
+let { PagePreloader } = require('page-preloader')
 ```
 
 Example usage:
