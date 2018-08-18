@@ -3,6 +3,7 @@
   <h1>PAGE PRELOADER</h1>
   
   [![Build Status](https://travis-ci.com/davidgithub1980/page-preloader.png?branch=master)](https://travis-ci.com/davidgithub1980/page-preloader)
+  [![codecov](https://codecov.io/gh/davidgithub1980/page-preloader/branch/master/graph/badge.svg)](https://codecov.io/gh/davidgithub1980/page-preloader)
   
 </div>
 
