@@ -1,4 +1,8 @@
-import { Utils } from './utils'
+import { FingerprintUtils } from './utils/fingeprint'
+import { PagingUtils } from './utils/paging'
+import { UrlUtils } from './utils/url'
+import { XhrUtils } from './utils/xhr'
+import { Debugger } from './debugger'
 
 /**
  * Page Preloader
@@ -13,7 +17,8 @@ import { Utils } from './utils'
 window.__preloadedData = {}
 
 // helpers
-let _Utils = new Utils()
+let _PagingUtils = new PagingUtils()
+let _Debugger = new Debugger()
 
 // main worker
 let _worker
@@ -27,22 +32,19 @@ export const PagePreloader = {
    *
    */
   init(ops = {}) {
-    let workerFn = (ops, utils) => {
+    let workerFn = (ops, debug, urlUtils, xhrUtils, pagingUtils, fingerprintUtils) => {
       // default request page
       let requestPage = 1
 
-      // containers
-      let xhr = []
+      // pre-loaded data container
       let store = {}
 
-      let fingerprint = ''
-      let fingerprintTicks = 0
-
-      // state to represent that XHR is done
-      const XHR_STATE_OK = 4
-
       // helpers
-      utils = new utils()
+      fingerprintUtils = new fingerprintUtils()
+      pagingUtils = new pagingUtils()
+      urlUtils = new urlUtils()
+      xhrUtils = new xhrUtils()
+      debug = new debug()
 
       // prep options
       let options = {
@@ -55,12 +57,15 @@ export const PagePreloader = {
       // extend options
       options = Object.assign(options, ops)
 
+      // set messaging fn
+      xhrUtils.setMessenger(self.postMessage)
+
       // listen to external requests
       self.addEventListener('message', (event) => {
         // reload store and do not proceed
         if (event.data && event.data.action === 'RELOAD_STORE') {
           store = event.data.store
-          options.debug && console.info('| > | PAGE PRELOADER | - updating store', store)
+          options.debug && debug.logStoreUpdate(store)
 
           return
         }
@@ -68,46 +73,31 @@ export const PagePreloader = {
         // we have a brand-new store so supervise it
         !Object.keys(store || {}).length && supervisePagingData()
 
-        let nextPage, prevPage
-        let requestUrl
-        let pages
-
         // extract current page or default to 1
-        requestPage = extractCurrentPage(event)
-
-        // build final url to request
-        requestUrl = buildRequestUrl(event)
+        requestPage = pagingUtils.extractCurrentPage(event)
 
         if (!requestPage)
           return
 
-        // prep prev & next pages
-        prevPage = Math.max(1, requestPage - 1)
-        nextPage = requestPage + 1
-
-        // prep next page
-        pages = [nextPage]
-
-        // prev page only if it is not the current page -> otherwise next 2 pages
-        requestPage !== 1 ? pages.push(prevPage) : pages.push(nextPage + 1)
+        // build final url to request
+        let requestUrl = urlUtils.buildRequest(event)
 
         // iterate pages
-        pages.forEach((p) => {
-          ((_page) => {
-            setTimeout(() => {
-              let endPoint = event.data.apiEndpoint.replace(/(.*page=)(\d+)(.*)/, `$1${_page}$3`)
-              let target = requestUrl.replace(/(.*page=)(\d+)(.*)/, `$1${_page}$3`)
+        setTimeout(() => {
+          pagingUtils.buildPagesToPoll(requestPage).forEach((p) => {
+            let endPoint = urlUtils.buildContextualizedEndpoint(event.data.apiEndpoint, p)
+            let target = urlUtils.buildContextualizedTarget(requestUrl, p)
 
-              // do not proceed if dataset already cached
-              if (store && store[endPoint]) {
-                return
-              }
+            // do not proceed if dataset already cached
+            if (store && store[endPoint]) {
+              return
+            }
 
-              // perform XHR request
-              doXHR(target, endPoint, _page)
-            }, options.preloadDelay)
-          })(p)
-        })
+            // perform XHR request
+            xhrUtils.pollRemoteSource(target, endPoint, p, requestPage)
+            options.debug && debug.logUrlRequest(target)
+          })
+        }, options.preloadDelay)
       })
 
       /**
@@ -116,22 +106,15 @@ export const PagePreloader = {
       let supervisePagingData = () => {
         (function _cache() {
           setTimeout(() => {
-            options.debug && console.info('| > | PAGE PRELOADER | - trying to re-cache')
+            options.debug && debug.logCacheAttempt()
 
             // store fingerprint to represent current state of the store
-            let newFingerprint = utils.getFingerprint(store)
-
-            if (fingerprint !== newFingerprint) {
-              fingerprint = newFingerprint
-              fingerprintTicks = 0
-            } else {
-              fingerprintTicks++
-            }
+            fingerprintUtils.update(store)
 
             //
-            if (fingerprintTicks > options.maxInactivityTicks) {
-              options.debug && console.info('| > | PAGE PRELOADER | - inactivity shutdown')
+            if (fingerprintUtils.getTicks() > options.maxInactivityTicks) {
               self.postMessage({ action: 'CLEAR_STORE' })
+              options.debug && debug.logShutdown()
               store = {}
 
               return
@@ -140,15 +123,10 @@ export const PagePreloader = {
             for (let endPoint in store) {
               let data = store[endPoint]
 
-              let isRecacheable = (
-                xhr[data.page] &&
-                xhr[data.page].readyState === XHR_STATE_OK &&
-                Date.now() - data.loadTime > options.cacheDuration
-              )
-
-              if (isRecacheable) {
-                doXHR(data.target, endPoint, data.page, data.requestPage)
-                options.debug && console.info('| > | PAGE PRELOADER | - re-caching page ' + data.page)
+              if (xhrUtils.isRequestReacacheable(data.page, data.loadTime, options.cacheDuration)) {
+                xhrUtils.pollRemoteSource(data.target, endPoint, data.page, data.requestPage)
+                options.debug && debug.logUrlRequest(data.target)
+                options.debug && debug.logPageCache(data.page)
               }
             }
 
@@ -156,81 +134,27 @@ export const PagePreloader = {
           }, options.cacheDuration)
         })()
       }
-
-      /**
-       *
-       * @param target
-       * @param endPoint
-       * @param page
-       */
-      let doXHR = (target, endPoint, page) => {
-        options.debug && console.info('| > | PAGE PRELOADER | - requesting url', target)
-
-        xhr[page] = new XMLHttpRequest()
-        xhr[page].open('GET', target, true)
-
-        xhr[page].onreadystatechange = () => {
-          xhr[page].readyState === XHR_STATE_OK && xhr[page].responseText &&
-          self.postMessage(buildResponse(page, target, endPoint, xhr[page].responseText))
-        }
-
-        xhr[page].send(null)
-      }
-
-      /**
-       *
-       * @param data
-       * @return {number}
-       */
-      let extractCurrentPage = ({ data }) => {
-        let apiEndpoint = data.apiEndpoint && data.apiEndpoint.match(/.*page=(\d+).*/)
-
-        return Number((apiEndpoint && apiEndpoint[1]) || 1)
-      }
-
-      /**
-       *
-       * @param data
-       * @return {string}
-       */
-      let buildRequestUrl = ({ data }) => {
-        return String(data.origin.concat(data.apiEndpoint))
-      }
-
-      /**
-       *
-       * @param page
-       * @param target
-       * @param endPoint
-       * @param data
-       * @return {*}
-       */
-      let buildResponse = (page, target, endPoint, data) => {
-        try {
-          return {
-            page,
-            target,
-            endPoint,
-            requestPage,
-            loadTime: Date.now(),
-            data: JSON.parse(data)
-          }
-        } catch (e) {
-          return {}
-        }
-      }
     }
 
     try {
       // set up web worker
       let blob = new Blob(
-        [`(${workerFn.toString()})(${JSON.stringify(ops)},${Utils.toString()})`],
+        [`
+          (${workerFn.toString()}) (
+            ${JSON.stringify(ops)},
+            ${Debugger},
+            ${UrlUtils.toString()},
+            ${XhrUtils.toString()},
+            ${PagingUtils.toString()},
+            ${FingerprintUtils.toString()}
+          )
+        `],
         {type: 'application/javascript'}
       )
 
       _worker = new Worker(URL.createObjectURL(blob))
     } catch (e) {
-      console.info('| > | PAGE PRELOADER | - web-worker functionality not suppported')
+      _Debugger.logWorkerWarning()
       _worker = null
     }
   },
@@ -257,13 +181,11 @@ export const PagePreloader = {
       let { endPoint, requestPage } = event.data
 
       window.__preloadedData[endPoint] = { ...event.data }
-      window.__preloadedData = _Utils.refreshPagingContext(requestPage, window.__preloadedData)
+      window.__preloadedData = _PagingUtils.refreshContext(requestPage, window.__preloadedData)
 
       _worker.postMessage({ action: 'RELOAD_STORE', store: window.__preloadedData })
     };
 
-    _worker.onerror = (e) => {
-      console.info('| > | PAGE PRELOADER | - error', e);
-    };
+    _worker.onerror = (e) => { _Debugger.logError(e) };
   },
 }

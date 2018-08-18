@@ -9,7 +9,7 @@
     "loader"
   ],
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "jest",
     "prepublishOnly": "node node_modules/babel-cli/bin/babel.js src --out-dir lib"
   },
   "author": "David Zaba",
@@ -25,9 +25,11 @@
   "devDependencies": {
     "babel-cli": "^6.26.0",
     "babel-core": "^6.26.3",
-    "babel-preset-env": "^1.7.0",
+    "babel-jest": "^23.4.2",
+    "babel-plugin-transform-es2015-modules-simple-commonjs": "^0.3.0",
     "babel-plugin-transform-object-rest-spread": "^6.26.0",
-    "babel-plugin-transform-es2015-modules-simple-commonjs": "^0.3.0"
+    "babel-preset-env": "^1.7.0",
+    "jest": "^23.4.2"
   },
   "babel": {
     "presets": [
@@ -36,6 +38,11 @@
     "plugins": [
       "transform-object-rest-spread",
       "transform-es2015-modules-simple-commonjs"
+    ]
+  },
+  "jest": {
+    "transformIgnorePatterns": [
+      "node_modules"
     ]
   }
 }

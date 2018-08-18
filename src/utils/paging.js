@@ -1,10 +1,17 @@
+
 /**
  * Utils
  * @author David Zaba
  *
  */
 
-export function Utils() {
+export function PagingUtils() {
+
+  /**
+   *
+   * @type {RegExp}
+   */
+  let pageRegExp = new RegExp(/.*page=(\d+).*/)
 
   /**
    *
@@ -12,11 +19,16 @@ export function Utils() {
    * @param data
    * @return {{}}
    */
-  this.refreshPagingContext = (requestPage, data) => {
+  this.refreshContext = (requestPage, data = {}) => {
+    !requestPage && (requestPage = 1)
     let newContent = {}
 
     for (let target in data) {
-      let page = (data[target] && data[target].page) || 1
+      let page = data[target] && data[target].page
+
+      if (!page) {
+        continue
+      }
 
       if (Number(page) === Number(requestPage)) {
         newContent[target] = data[target]
@@ -59,14 +71,35 @@ export function Utils() {
 
   /**
    *
-   * @param store
-   * @return {*}
+   * @param data
+   * @return {number}
    */
-  this.getFingerprint = (store) => {
-    try {
-      return Object.keys(store).join('-')
-    } catch (e) {
-      return ''
-    }
+  this.extractCurrentPage = ({ data = {} }) => {
+    let apiEndpoint = (data.apiEndpoint && data.apiEndpoint.match(pageRegExp)) || 1
+
+    return Number((apiEndpoint && apiEndpoint[1]) || 1)
+  }
+
+  /**
+   *
+   * @param requestPage
+   * @return {[*]}
+   */
+  this.buildPagesToPoll = (requestPage = 1) => {
+    !requestPage && (requestPage = 1)
+    requestPage = Math.abs(requestPage)
+
+    // prep prev & next pages
+    let prevPage = Math.max(1, requestPage - 1)
+    let nextPage = requestPage + 1
+
+    // prep next page
+    let pages = [nextPage]
+
+    // prev page only if it is not the current page -> otherwise next 2 pages
+    requestPage !== 1 ? pages.push(prevPage) : pages.push(nextPage + 1)
+
+    // pages to poll
+    return pages.sort()
   }
 }
