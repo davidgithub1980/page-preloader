@@ -1,5 +1,8 @@
 <div align="center">
   <img width="200" src="https://i.l.hypercdn.sk/cz/data/98/logo.png">
+  
+  [![Build Status](https://travis-ci.org/davidgithub1980/page-preloader.png?branch=master)](https://travis-ci.org/davidgithub1980/page-preloader)
+  
   <h1>PAGE PRELOADER</h1>
 </div>
 
