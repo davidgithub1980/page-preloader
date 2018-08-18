@@ -9,7 +9,7 @@
     "loader"
   ],
   "scripts": {
-    "test": "jest && codecov",
+    "test": "jest",
     "prepublishOnly": "node node_modules/babel-cli/bin/babel.js src --out-dir lib"
   },
   "author": "David Zaba",
