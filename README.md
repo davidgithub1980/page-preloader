@@ -1,9 +1,9 @@
 <div align="center">
   <img width="200" src="https://i.l.hypercdn.sk/cz/data/98/logo.png">
+  <h1>PAGE PRELOADER</h1>
   
   [![Build Status](https://travis-ci.com/davidgithub1980/page-preloader.png?branch=master)](https://travis-ci.com/davidgithub1980/page-preloader)
   
-  <h1>PAGE PRELOADER</h1>
 </div>
 
 A simple page preloader using dedicated web worker.
