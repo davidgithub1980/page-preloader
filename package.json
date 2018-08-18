@@ -9,7 +9,7 @@
     "loader"
   ],
   "scripts": {
-    "test": "jest",
+    "test": "jest && codecov",
     "prepublishOnly": "node node_modules/babel-cli/bin/babel.js src --out-dir lib"
   },
   "author": "David Zaba",
@@ -29,6 +29,7 @@
     "babel-plugin-transform-es2015-modules-simple-commonjs": "^0.3.0",
     "babel-plugin-transform-object-rest-spread": "^6.26.0",
     "babel-preset-env": "^1.7.0",
+    "istanbul": "^0.4.5",
     "jest": "^23.4.2"
   },
   "babel": {
@@ -43,6 +44,8 @@
   "jest": {
     "transformIgnorePatterns": [
       "node_modules"
-    ]
+    ],
+    "coverageDirectory": "./coverage/",
+    "collectCoverage": true
   }
 }
