@@ -59,6 +59,48 @@ export const PagePreloader = {
         maxInactivityTicks: 20
       };
 
+      /**
+       * Supervisor to keep data up-to-date
+       * @returns {void}
+       */
+      let supervisePagingData = () => {
+        (function _cache () {
+          setTimeout(() => {
+            /* eslint no-unused-expressions: 0 */
+            options.debug && debug.logCacheAttempt();
+
+            // store fingerprint to represent current state of the store
+            fingerprintUtils.update(store);
+
+            //
+            if (fingerprintUtils.getTicks() > options.maxInactivityTicks) {
+              self.postMessage({ action: 'CLEAR_STORE' });
+              /* eslint no-unused-expressions: 0 */
+              options.debug && debug.logShutdown();
+              store = {};
+
+              return;
+            }
+
+            for (let endPoint in store) {
+              let data = store[endPoint];
+
+              /* eslint max-len: 0 */
+              if (xhrUtils.isRequestReacacheable(data.page, data.loadTime, options.cacheDuration)) {
+                /* eslint max-len: 0 */
+                xhrUtils.pollRemoteSource(data.target, endPoint, data.page, data.requestPage);
+
+                /* eslint no-unused-expressions: 0 */
+                options.debug && debug.logUrlRequest(data.target);
+                options.debug && debug.logPageCache(data.page);
+              }
+            }
+
+            _cache();
+          }, options.cacheDuration);
+        })();
+      };
+
       // extend options
       options = Object.assign(options, settings);
 
@@ -70,6 +112,7 @@ export const PagePreloader = {
         // reload store and do not proceed
         if (event.data && event.data.action === 'RELOAD_STORE') {
           store = event.data.store;
+          /* eslint no-unused-expressions: 0 */
           options.debug && debug.logStoreUpdate(store);
 
           return;
@@ -102,48 +145,12 @@ export const PagePreloader = {
 
             // perform XHR request
             xhrUtils.pollRemoteSource(target, endPoint, p, requestPage);
+
+            /* eslint no-unused-expressions: 0 */
             options.debug && debug.logUrlRequest(target);
           });
         }, options.preloadDelay);
       });
-
-      /**
-       * Supervisor to keep data up-to-date
-       * @returns {void}
-       */
-      let supervisePagingData = () => {
-        (function _cache () {
-          setTimeout(() => {
-            options.debug && debug.logCacheAttempt();
-
-            // store fingerprint to represent current state of the store
-            fingerprintUtils.update(store);
-
-            //
-            if (fingerprintUtils.getTicks() > options.maxInactivityTicks) {
-              self.postMessage({ action: 'CLEAR_STORE' });
-              options.debug && debug.logShutdown();
-              store = {};
-
-              return;
-            }
-
-            for (let endPoint in store) {
-              let data = store[endPoint];
-
-              /* eslint max-len: 0 */
-              if (xhrUtils.isRequestReacacheable(data.page, data.loadTime, options.cacheDuration)) {
-                /* eslint max-len: 0 */
-                xhrUtils.pollRemoteSource(data.target, endPoint, data.page, data.requestPage);
-                options.debug && debug.logUrlRequest(data.target);
-                options.debug && debug.logPageCache(data.page);
-              }
-            }
-
-            _cache();
-          }, options.cacheDuration);
-        })();
-      };
     };
 
     try {
