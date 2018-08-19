@@ -1,6 +1,6 @@
 {
   "name": "page-preloader",
-  "version": "1.2.1",
+  "version": "1.2.0",
   "description": "Preload pages via web worker",
   "main": "lib/index.js",
   "keywords": [
@@ -9,8 +9,10 @@
     "loader"
   ],
   "scripts": {
-    "test": "jest && codecov",
-    "prepublishOnly": "node node_modules/babel-cli/bin/babel.js src --out-dir lib"
+    "test": "jest",
+    "lint": "node_modules/.bin/goodparts src/* --fix",
+    "transpile": "node node_modules/babel-cli/bin/babel.js src --out-dir lib",
+    "prepublishOnly": "npm run lint && npm run transpile"
   },
   "author": "David Zaba",
   "license": "MIT",
@@ -29,7 +31,7 @@
     "babel-plugin-transform-es2015-modules-simple-commonjs": "^0.3.0",
     "babel-plugin-transform-object-rest-spread": "^6.26.0",
     "babel-preset-env": "^1.7.0",
-    "codecov": "^3.0.4",
+    "goodparts": "^1.2.1",
     "jest": "^23.4.2"
   },
   "babel": {
@@ -44,8 +46,6 @@
   "jest": {
     "transformIgnorePatterns": [
       "node_modules"
-    ],
-    "coverageDirectory": "./coverage/",
-    "collectCoverage": true
+    ]
   }
 }

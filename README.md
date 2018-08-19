@@ -2,8 +2,10 @@
   <img width="200" src="https://i.l.hypercdn.sk/cz/data/98/logo.png">
   <h1>PAGE PRELOADER</h1>
   
+  [![npm version](https://badge.fury.io/js/page-preloader.svg)](https://badge.fury.io/js/page-preloader)
   [![Build Status](https://travis-ci.com/davidgithub1980/page-preloader.png?branch=master)](https://travis-ci.com/davidgithub1980/page-preloader)
   [![codecov](https://codecov.io/gh/davidgithub1980/page-preloader/branch/master/graph/badge.svg)](https://codecov.io/gh/davidgithub1980/page-preloader)
+  [![JavaScript Style Guide: Good Parts](https://img.shields.io/badge/code%20style-goodparts-brightgreen.svg?style=flat)](https://github.com/dwyl/goodparts "JavaScript The Good Parts")
   
 </div>
 

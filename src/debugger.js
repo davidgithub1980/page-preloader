@@ -4,64 +4,77 @@
  *
  */
 
-export function Debugger() {
-
+export function Debugger () {
   /**
    *
    * @type {string}
    */
-  const LOG_PREFIX = '| > | PAGE PRELOADER | -'
+  const LOG_PREFIX = '| > | PAGE PRELOADER | -';
 
   /**
    *
-   * @param url
+   * @param {string} url Request URL
+   * @returns {void}
    */
   this.logUrlRequest = (url) => {
-    console.info(`${LOG_PREFIX} requesting url`, url)
-  }
+    /* eslint no-console: 0 */
+    console.info(`${LOG_PREFIX} requesting url`, url);
+  };
 
   /**
    *
-   * @param store
+   * @param {object} store Main store with preloaded data
+   * @returns {void}
    */
   this.logStoreUpdate = (store) => {
-    console.info(`${LOG_PREFIX} updating store`, store)
-  }
+    /* eslint no-console: 0 */
+    console.info(`${LOG_PREFIX} updating store`, store);
+  };
 
   /**
    *
+   * @returns {void}
    */
   this.logCacheAttempt = () => {
-    console.info(`${LOG_PREFIX} trying to re-cache`)
-  }
+    /* eslint no-console: 0 */
+    console.info(`${LOG_PREFIX} trying to re-cache`);
+  };
 
   /**
    *
-   * @param page
+   * @param {number} page Page to re-cache
+   * @returns {void}
    */
   this.logPageCache = (page) => {
-    console.info(`${LOG_PREFIX} re-caching page`, page)
-  }
+    /* eslint no-console: 0 */
+    console.info(`${LOG_PREFIX} re-caching page`, page);
+  };
 
   /**
    *
+   * @returns {void}
    */
   this.logShutdown = () => {
-    console.info(`${LOG_PREFIX} inactivity shutdown`)
-  }
+    /* eslint no-console: 0 */
+    console.info(`${LOG_PREFIX} inactivity shutdown`);
+  };
 
   /**
    *
+   * @returns {void}
    */
   this.logWorkerWarning = () => {
-    console.info(`${LOG_PREFIX} web-worker functionality not suppported`)
-  }
+    /* eslint no-console: 0 */
+    console.info(`${LOG_PREFIX} web-worker functionality not suppported`);
+  };
 
   /**
    *
-   * @param e
+   * @param {object} e Error object
+   * @returns {void}
    */
   this.logError = (e) => {
-    console.error(`${LOG_PREFIX} error`, e)
-  }
+    /* eslint no-console: 0 */
+    console.error(`${LOG_PREFIX} error`, e);
+  };
 }

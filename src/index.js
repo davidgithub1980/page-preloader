@@ -1,8 +1,8 @@
-import { FingerprintUtils } from './utils/fingeprint'
-import { PagingUtils } from './utils/paging'
-import { UrlUtils } from './utils/url'
-import { XhrUtils } from './utils/xhr'
-import { Debugger } from './debugger'
+import { FingerprintUtils } from './utils/fingeprint';
+import { PagingUtils } from './utils/paging';
+import { UrlUtils } from './utils/url';
+import { XhrUtils } from './utils/xhr';
+import { Debugger } from './debugger';
 
 /**
  * Page Preloader
@@ -11,17 +11,18 @@ import { Debugger } from './debugger'
  */
 
 // https://benohead.com/cross-domain-cross-browser-web-workers/
+/* eslint max-len: 0 */
 // https://stackoverflow.com/questions/21408510/chrome-cant-load-web-worker#33432215
 
 // container to store preloaded data
-window.__preloadedData = {}
+window.__preloadedData = {};
 
 // helpers
-let _PagingUtils = new PagingUtils()
-let _Debugger = new Debugger()
+let _PagingUtils = new PagingUtils();
+let _Debugger = new Debugger();
 
 // main worker
-let _worker
+let _worker;
 
 /**
  *
@@ -30,111 +31,120 @@ let _worker
 export const PagePreloader = {
   /**
    *
+   * @param {object} ops Options
+   * @returns {void}
    */
-  init(ops = {}) {
-    let workerFn = (ops, debug, urlUtils, xhrUtils, pagingUtils, fingerprintUtils) => {
+  init (ops = {}) {
+    /* eslint max-len: 0 */
+    /* eslint max-params: 0 */
+    let workerFn = (settings, Debug, UrlHelper, XhrHelper, PagingHelper, FingerprintHelper) => {
       // default request page
-      let requestPage = 1
+      let requestPage = 1;
 
       // pre-loaded data container
-      let store = {}
+      let store = {};
 
       // helpers
-      fingerprintUtils = new fingerprintUtils()
-      pagingUtils = new pagingUtils()
-      urlUtils = new urlUtils()
-      xhrUtils = new xhrUtils()
-      debug = new debug()
+      const fingerprintUtils = new FingerprintHelper();
+      const pagingUtils = new PagingHelper();
+      const urlUtils = new UrlHelper();
+      const xhrUtils = new XhrHelper();
+      const debug = new Debug();
 
       // prep options
       let options = {
         debug: false,
         preloadDelay: 2000,
         cacheDuration: 60000,
-        maxInactivityTicks: 20,
-      }
+        maxInactivityTicks: 20
+      };
 
       // extend options
-      options = Object.assign(options, ops)
+      options = Object.assign(options, settings);
 
       // set messaging fn
-      xhrUtils.setMessenger(self.postMessage)
+      xhrUtils.setMessenger(self.postMessage);
 
       // listen to external requests
       self.addEventListener('message', (event) => {
         // reload store and do not proceed
         if (event.data && event.data.action === 'RELOAD_STORE') {
-          store = event.data.store
-          options.debug && debug.logStoreUpdate(store)
+          store = event.data.store;
+          options.debug && debug.logStoreUpdate(store);
 
-          return
+          return;
         }
 
         // we have a brand-new store so supervise it
-        !Object.keys(store || {}).length && supervisePagingData()
+        !Object.keys(store || {}).length && supervisePagingData();
 
         // extract current page or default to 1
-        requestPage = pagingUtils.extractCurrentPage(event)
+        requestPage = pagingUtils.extractCurrentPage(event);
 
-        if (!requestPage)
-          return
+        if (!requestPage) {
+          return;
+        }
 
         // build final url to request
-        let requestUrl = urlUtils.buildRequest(event)
+        let requestUrl = urlUtils.buildRequest(event);
 
         // iterate pages
         setTimeout(() => {
           pagingUtils.buildPagesToPoll(requestPage).forEach((p) => {
-            let endPoint = urlUtils.buildContextualizedEndpoint(event.data.apiEndpoint, p)
-            let target = urlUtils.buildContextualizedTarget(requestUrl, p)
+            /* eslint max-len: 0 */
+            let endPoint = urlUtils.buildContextualizedEndpoint(event.data.apiEndpoint, p);
+            let target = urlUtils.buildContextualizedTarget(requestUrl, p);
 
             // do not proceed if dataset already cached
             if (store && store[endPoint]) {
-              return
+              return;
             }
 
             // perform XHR request
-            xhrUtils.pollRemoteSource(target, endPoint, p, requestPage)
-            options.debug && debug.logUrlRequest(target)
-          })
-        }, options.preloadDelay)
-      })
+            xhrUtils.pollRemoteSource(target, endPoint, p, requestPage);
+            options.debug && debug.logUrlRequest(target);
+          });
+        }, options.preloadDelay);
+      });
 
       /**
        * Supervisor to keep data up-to-date
+       * @returns {void}
        */
       let supervisePagingData = () => {
-        (function _cache() {
+        (function _cache () {
           setTimeout(() => {
-            options.debug && debug.logCacheAttempt()
+            options.debug && debug.logCacheAttempt();
 
             // store fingerprint to represent current state of the store
-            fingerprintUtils.update(store)
+            fingerprintUtils.update(store);
 
             //
             if (fingerprintUtils.getTicks() > options.maxInactivityTicks) {
-              self.postMessage({ action: 'CLEAR_STORE' })
-              options.debug && debug.logShutdown()
-              store = {}
+              self.postMessage({ action: 'CLEAR_STORE' });
+              options.debug && debug.logShutdown();
+              store = {};
 
-              return
+              return;
             }
 
             for (let endPoint in store) {
-              let data = store[endPoint]
+              let data = store[endPoint];
 
+              /* eslint max-len: 0 */
               if (xhrUtils.isRequestReacacheable(data.page, data.loadTime, options.cacheDuration)) {
-                xhrUtils.pollRemoteSource(data.target, endPoint, data.page, data.requestPage)
-                options.debug && debug.logUrlRequest(data.target)
-                options.debug && debug.logPageCache(data.page)
+                /* eslint max-len: 0 */
+                xhrUtils.pollRemoteSource(data.target, endPoint, data.page, data.requestPage);
+                options.debug && debug.logUrlRequest(data.target);
+                options.debug && debug.logPageCache(data.page);
               }
             }
 
-            _cache()
-          }, options.cacheDuration)
-        })()
-      }
-    }
+            _cache();
+          }, options.cacheDuration);
+        })();
+      };
+    };
 
     try {
       // set up web worker
@@ -149,43 +159,50 @@ export const PagePreloader = {
             ${FingerprintUtils.toString()}
           )
         `],
-        {type: 'application/javascript'}
-      )
+        { type: 'application/javascript' }
+      );
 
-      _worker = new Worker(URL.createObjectURL(blob))
+      _worker = new Worker(URL.createObjectURL(blob));
     } catch (e) {
-      _Debugger.logWorkerWarning()
-      _worker = null
+      _Debugger.logWorkerWarning();
+      _worker = null;
     }
   },
 
   /**
    *
-   * @param origin
-   * @param apiEndpoint
+   * @param {string} origin Original domain
+   * @param {string} apiEndpoint API fragment
+   * @returns {void}
    */
-  query(origin, apiEndpoint) {
+  query (origin, apiEndpoint) {
     if (!_worker) {
-      return
+      return;
     }
 
     _worker.postMessage({ origin, apiEndpoint, store: window.__preloadedData });
 
     _worker.onmessage = (event) => {
       if (event.data.action === 'CLEAR_STORE') {
-        window.__preloadedData = {}
+        window.__preloadedData = {};
 
-        return
+        return;
       }
 
-      let { endPoint, requestPage } = event.data
+      let { endPoint, requestPage } = event.data;
 
-      window.__preloadedData[endPoint] = { ...event.data }
-      window.__preloadedData = _PagingUtils.refreshContext(requestPage, window.__preloadedData)
+      window.__preloadedData[endPoint] = { ...event.data };
+      /* eslint max-len: 0 */
+      window.__preloadedData = _PagingUtils.refreshContext(requestPage, window.__preloadedData);
 
-      _worker.postMessage({ action: 'RELOAD_STORE', store: window.__preloadedData })
+      _worker.postMessage({
+        action: 'RELOAD_STORE',
+        store: window.__preloadedData
+      });
     };
 
-    _worker.onerror = (e) => { _Debugger.logError(e) };
-  },
-}
+    _worker.onerror = (e) => {
+      _Debugger.logError(e);
+    };
+  }
+};
