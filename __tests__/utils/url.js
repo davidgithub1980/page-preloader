@@ -157,7 +157,7 @@ describe('Utils/Url Service', () => {
         result: '/api/product/find?id=1&page=5&baz=bar',
       },
     ].forEach((testSet) => {
-      expect(Utils.buildContextualizedTarget(testSet.url, testSet.page))
+      expect(Utils.buildContextualizedEndpoint(testSet.url, testSet.page))
         .toEqual(testSet.result)
     })
   })
@@ -179,7 +179,7 @@ describe('Utils/Url Service', () => {
         page: 0,
       },
     ].forEach((testSet) => {
-      expect(Utils.buildContextualizedTarget(testSet.url, testSet.page))
+      expect(Utils.buildContextualizedEndpoint(testSet.url, testSet.page))
         .toBeFalsy()
     })
   })
