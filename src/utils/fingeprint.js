@@ -30,11 +30,7 @@ export function FingerprintUtils() {
    * @return {*}
    */
   this.build = (store) => {
-    try {
-      return Object.keys(store).join('-')
-    } catch (e) {
-      return ''
-    }
+    return Object.keys(store).join('-')
   }
 
   /**

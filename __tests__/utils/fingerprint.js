@@ -31,6 +31,12 @@ describe('Utils/Fingerprint Service', () => {
       },
 
       {
+        store: undefined,
+        fingerprint: '',
+        ticks: 3,
+      },
+
+      {
         store: {
           '/api/product/find?id=100&page=1': {},
         },
