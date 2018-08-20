@@ -56,8 +56,15 @@ export function XhrUtils() {
     xhr[page].open('GET', target, true)
 
     xhr[page].onreadystatechange = () => {
-      this.isRequestReady(page) && xhr[page].responseText &&
-      dispatch(this.buildResponse(page, requestPage, target, endPoint, xhr[page].responseText))
+      try {
+        this.isRequestReady(page) && xhr[page].responseText &&
+        dispatch(this.buildResponse(page, requestPage, target, endPoint, xhr[page].responseText))
+      } catch (e) {
+
+
+
+
+      }
     }
 
     xhr[page].send(null)
@@ -79,7 +86,7 @@ export function XhrUtils() {
    * @param cacheDuration
    * @return {boolean}
    */
-  this.isRequestReacacheable = (page, loadTime = 0, cacheDuration = 0) => {
+  this.isRequestRecacheable = (page, loadTime = 0, cacheDuration = 0) => {
     return this.isRequestReady(page) && Date.now() - loadTime > cacheDuration
   }
 

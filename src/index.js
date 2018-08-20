@@ -86,7 +86,7 @@ export const PagePreloader = {
               let data = store[endPoint];
 
               /* eslint max-len: 0 */
-              if (xhrUtils.isRequestReacacheable(data.page, data.loadTime, options.cacheDuration)) {
+              if (xhrUtils.isRequestRecacheable(data.page, data.loadTime, options.cacheDuration)) {
                 /* eslint max-len: 0 */
                 xhrUtils.pollRemoteSource(data.target, endPoint, data.page, data.requestPage);
 
