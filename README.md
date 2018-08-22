@@ -1,5 +1,7 @@
 <div align="center">
-  <img width="200" src="https://i.l.hypercdn.sk/cz/data/98/logo.png">
+  <a href="https://github.com/davidgithub1980/page-preloader">
+    <img width="200" src="http://drive.google.com/uc?export=view&id=1i7E0fKMq3uGjesasLG3AxM7G_PLK6hOp">
+  </a>
   <h1>PAGE PRELOADER</h1>
   
   [![npm version](https://badge.fury.io/js/page-preloader.svg)](https://badge.fury.io/js/page-preloader)
