@@ -36,14 +36,14 @@ PagePreloader.init()
 // use custom options
 PagePreloader.init({
     debug: false, 
-    // turn on/off debug mode
     // defaults to 'false'
+    // turn on/off debug mode
     
     preloadKey: 'uri', 
     // defaults to 'uri'
-    // determine key under which to store page data
-    // - 'uri' - page data to be stored using string URI as key
-    // - 'page' - page data to be stored using page number as key
+    // determine key under which to store preloaded data
+    // - 'uri' - data to be stored using URI string as key
+    // - 'page' - data to be stored using page number as key
     
     preloadDelay: 2000,
     // defaults to '2000'
@@ -62,11 +62,11 @@ PagePreloader.init({
 PagePreloader.query(origin, endPoint)
 // - origin (eg. location.origin) - base url (https://www.foo.baz) to request
 // - endPoint - actual requested page fragment (/api/product/find?id=1&page=2)
-// Final requested page is to be then: https://www.foo.baz/api/product/find?id=1&page=2
+// Final requested page then: https://www.foo.baz/api/product/find?id=1&page=2
 
-// - data then become available inside global 'window' variable
-// - check the global object for preloaded data when requesting new page
 window.__preloadedData
+// Preloaded data are available inside this global variable
+// You should negotiate this object before requesting new page
 ```
 
 
