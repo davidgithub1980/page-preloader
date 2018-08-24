@@ -20,6 +20,12 @@ export function XhrUtils() {
 
   /**
    *
+   * @type {string}
+   */
+  let preloadKey = ''
+
+  /**
+   *
    * @type {Array}
    */
   let xhr = []
@@ -30,6 +36,14 @@ export function XhrUtils() {
    */
   this.getRequest = () => {
     return new XMLHttpRequest()
+  }
+
+  /**
+   *
+   * @param key
+   */
+  this.setPreloadKey = (key) => {
+    preloadKey = key
   }
 
   /**
@@ -59,12 +73,7 @@ export function XhrUtils() {
       try {
         this.isRequestReady(page) && xhr[page].responseText &&
         dispatch(this.buildResponse(page, requestPage, target, endPoint, xhr[page].responseText))
-      } catch (e) {
-
-
-
-
-      }
+      } catch (e) {}
     }
 
     xhr[page].send(null)
@@ -100,8 +109,12 @@ export function XhrUtils() {
    * @return {*}
    */
   this.buildResponse = (page, requestPage, target, endPoint, data) => {
+    let id = endPoint
+    preloadKey === 'page' && (id = page)
+
     try {
       return {
+        id,
         page,
         target,
         endPoint,

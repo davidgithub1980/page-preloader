@@ -25,7 +25,6 @@ describe('Utils/XHR Service', () => {
       readyState: 4,
       open() {},
       send() {}
-
     })
   }
 
@@ -63,6 +62,7 @@ describe('Utils/XHR Service', () => {
   it('does not trigger off an XHR request', () => {
     [
       {
+        // 'target' missing
         endPoint: '/api/product/find?id=1&page=1',
         page: 1,
         requestPage: 1,
@@ -70,6 +70,7 @@ describe('Utils/XHR Service', () => {
 
       {
         target: 'https://foo.com',
+        // 'endPoint' missing
         page: 1,
         requestPage: 1,
       },
@@ -77,6 +78,7 @@ describe('Utils/XHR Service', () => {
       {
         target: 'https://foo.com',
         endPoint: '/api/product/find?id=1&page=1',
+        // 'page' missing
         requestPage: 1,
       },
 
@@ -84,6 +86,7 @@ describe('Utils/XHR Service', () => {
         target: 'https://foo.com',
         endPoint: '/api/product/find?id=1&page=1',
         page: 1,
+        // 'requestPage' missing
       },
     ].forEach((testSet) => {
       setXhrReadyMock()
@@ -204,13 +207,133 @@ describe('Utils/XHR Service', () => {
       let dispatchMock = jest.fn()
       testSet.shouldDispatch && Utils.setMessenger(dispatchMock)
 
+      let responseMock = jest.fn()
+      Utils.buildResponse = responseMock
+
       Utils.pollRemoteSource('https://foo.com', '/api/product/find?id=1&page=1', 1, 1)
 
       // expectations
-      testSet.shouldDispatch ?
+      if (testSet.shouldDispatch) {
         expect(dispatchMock).toHaveBeenCalled()
-        :
+        expect(responseMock).toHaveBeenCalled()
+      } else {
         expect(dispatchMock).not.toHaveBeenCalled()
+        expect(responseMock).not.toHaveBeenCalled()
+      }
+    })
+  })
+
+  /**
+   * specs
+   */
+  it('should build proper response', () => {
+    [
+      // ---
+      {
+        dataIn: {
+          page: 1,
+          requestPage: 2,
+          target: 'https://www.foo.baz',
+          endPoint: '/api/product/id?page=1',
+          data: "{\"foo\"\"baz\"}", // invalid JSON
+        },
+
+        preloadKey: {
+          invoke: false
+        },
+
+        dataOut: {},
+      },
+
+      // ---
+      {
+        dataIn: {
+          page: 1,
+          requestPage: 2,
+          target: 'https://www.foo.baz',
+          endPoint: '/api/product/id?page=1',
+          data: "{\"foo\":\"baz\"}",
+        },
+
+        preloadKey: {
+          invoke: false
+        },
+
+        dataOut: {
+          id: '/api/product/id?page=1',
+          page: 1,
+          requestPage: 2,
+          target: 'https://www.foo.baz',
+          endPoint: '/api/product/id?page=1',
+          data: {foo: 'baz'},
+          loadTime: 1,
+        },
+      },
+
+      // ---
+      {
+        dataIn: {
+          page: 1,
+          requestPage: 2,
+          target: 'https://www.foo.baz',
+          endPoint: '/api/product/id?page=1',
+          data: "{\"foo\":\"baz\"}",
+        },
+
+        preloadKey: {
+          invoke: true,
+          val: 'foo',
+        },
+
+        dataOut: {
+          id: '/api/product/id?page=1',
+          page: 1,
+          requestPage: 2,
+          target: 'https://www.foo.baz',
+          endPoint: '/api/product/id?page=1',
+          data: {foo: 'baz'},
+          loadTime: 1,
+        },
+      },
+
+      // ---
+      {
+        dataIn: {
+          page: 1,
+          requestPage: 2,
+          target: 'https://www.foo.baz',
+          endPoint: '/api/product/id?page=1',
+          data: "{\"foo\":\"baz\"}",
+        },
+
+        preloadKey: {
+          invoke: true,
+          val: 'page',
+        },
+
+        dataOut: {
+          id: 1,
+          page: 1,
+          requestPage: 2,
+          target: 'https://www.foo.baz',
+          endPoint: '/api/product/id?page=1',
+          data: {foo: 'baz'},
+          loadTime: 1,
+        },
+      },
+    ].forEach((testSet) => {
+      testSet.preloadKey.invoke && Utils.setPreloadKey(testSet.preloadKey.val)
+
+      Date.now = jest.fn().mockReturnValueOnce(1)
+
+      // expectations
+      expect(Utils.buildResponse(
+        testSet.dataIn.page,
+        testSet.dataIn.requestPage,
+        testSet.dataIn.target,
+        testSet.dataIn.endPoint,
+        testSet.dataIn.data,
+      )).toEqual(testSet.dataOut)
     })
   })
 })

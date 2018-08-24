@@ -54,10 +54,14 @@ export const PagePreloader = {
       // prep options
       let options = {
         debug: false,
+        preloadKey: 'uri',
         preloadDelay: 2000,
         cacheDuration: 60000,
         maxInactivityTicks: 20
       };
+
+      // extend options
+      options = Object.assign(options, settings);
 
       /**
        * Supervisor to keep data up-to-date
@@ -101,8 +105,8 @@ export const PagePreloader = {
         })();
       };
 
-      // extend options
-      options = Object.assign(options, settings);
+      // -- set data id (identificator)
+      xhrUtils.setPreloadKey(options.preloadKey);
 
       // set messaging fn
       xhrUtils.setMessenger(self.postMessage);
@@ -196,9 +200,8 @@ export const PagePreloader = {
         return;
       }
 
-      let { endPoint, requestPage } = event.data;
-
-      window.__preloadedData[endPoint] = { ...event.data };
+      let { id, requestPage } = event.data;
+      window.__preloadedData[id] = { ...event.data };
       /* eslint max-len: 0 */
       window.__preloadedData = _PagingUtils.refreshContext(requestPage, window.__preloadedData);
 

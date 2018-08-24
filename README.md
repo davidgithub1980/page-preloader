@@ -36,22 +36,33 @@ PagePreloader.init()
 // use custom options
 PagePreloader.init({
     debug: false, 
-    // turn debug mode on/off
+    // turn on/off debug mode
+    // defaults to 'false'
     
-    preloadDelay: 2000, 
+    preloadKey: 'uri', 
+    // defaults to 'uri'
+    // determine key under which to store page data
+    // - 'uri' - page data to be stored using string URI as key
+    // - 'page' - page data to be stored using page number as key
+    
+    preloadDelay: 2000,
+    // defaults to '2000'
     // [ms] when to start preloading following every page request
     
     cacheDuration: 60000,
+    // defaults to '60000'
     // [ms] when to request/refresh data
     
     maxInactivityTicks: 20, 
+    // defaults to '20'
     // max attempts before shutdown
     // one attempt/tick is recorded whenever preloaded history remains unchanged
 })
 
-// - provide current location + URL of the newly requested page
-// - the newly requested page must contain paging fragment, i.e. 'page=5'
-PagePreloader.query(location.origin, requestUrl)
+PagePreloader.query(origin, endPoint)
+// - origin (eg. location.origin) - base url (https://www.foo.baz) to request
+// - endPoint - actual requested page fragment (/api/product/find?id=1&page=2)
+// Final requested page is to be then: https://www.foo.baz/api/product/find?id=1&page=2
 
 // - data then become available inside global 'window' variable
 // - check the global object for preloaded data when requesting new page
