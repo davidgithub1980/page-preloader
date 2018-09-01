@@ -99,14 +99,14 @@ export const PagePreloader = {
 
         // we have a brand-new store so supervise it
         !Object.keys(store || {}).length && (() => {
-          cacheUtils.setStore(store)
-          cacheUtils.setDebug(options.debug)
-          cacheUtils.setMessenger(self.postMessage)
-          cacheUtils.setExpiration(options.cacheDuration)
-          cacheUtils.setMaxInactivityTicks(options.maxInactivityTicks)
+          cacheUtils.setStore(store);
+          cacheUtils.setDebug(options.debug);
+          cacheUtils.setMessenger(self.postMessage);
+          cacheUtils.setExpiration(options.cacheDuration);
+          cacheUtils.setMaxInactivityTicks(options.maxInactivityTicks);
 
           cacheUtils.supervise(debug, fingerprintUtils, xhrUtils);
-        })()
+        })();
 
         // extract current page or default to 1
         requestPage = pagingUtils.extractCurrentPage(event);
@@ -186,6 +186,7 @@ export const PagePreloader = {
       }
 
       let { id, requestPage } = event.data;
+
       window.__preloadedData[id] = { ...event.data };
       /* eslint max-len: 0 */
       window.__preloadedData = _PagingUtils.refreshContext(requestPage, window.__preloadedData);
