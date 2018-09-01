@@ -90,13 +90,12 @@ export function XhrUtils() {
 
   /**
    *
-   * @param page
    * @param loadTime
    * @param cacheDuration
    * @return {boolean}
    */
-  this.isRequestRecacheable = (page, loadTime = 0, cacheDuration = 0) => {
-    return this.isRequestReady(page) && Date.now() - loadTime > cacheDuration
+  this.isRequestRecacheable = (loadTime = 0, cacheDuration = 0) => {
+    return Date.now() - loadTime > cacheDuration
   }
 
   /**

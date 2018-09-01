@@ -148,7 +148,7 @@ describe('Utils/XHR Service', () => {
         testSet.page
       )
 
-      expect(Utils.isRequestRecacheable(testSet.page, testSet.loadTime, testSet.cacheDuration))
+      expect(Utils.isRequestRecacheable(testSet.loadTime, testSet.cacheDuration))
         .toBe(testSet.result)
     })
   })

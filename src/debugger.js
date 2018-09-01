@@ -10,6 +10,7 @@ export function Debugger () {
    * @type {string}
    */
   const LOG_PREFIX = '| > | PAGE PRELOADER | -';
+  const LOG_SUFFIX = '| > | ---';
 
   /**
    *
@@ -19,6 +20,7 @@ export function Debugger () {
   this.logUrlRequest = (url) => {
     /* eslint no-console: 0 */
     console.info(`${LOG_PREFIX} requesting url`, url);
+    console.info(`${LOG_SUFFIX}`);
   };
 
   /**
@@ -29,6 +31,7 @@ export function Debugger () {
   this.logStoreUpdate = (store) => {
     /* eslint no-console: 0 */
     console.info(`${LOG_PREFIX} updating store`, store);
+    console.info(`${LOG_SUFFIX}`);
   };
 
   /**
@@ -38,6 +41,7 @@ export function Debugger () {
   this.logCacheAttempt = () => {
     /* eslint no-console: 0 */
     console.info(`${LOG_PREFIX} trying to re-cache`);
+    console.info(`${LOG_SUFFIX}`);
   };
 
   /**
@@ -48,6 +52,7 @@ export function Debugger () {
   this.logPageCache = (page) => {
     /* eslint no-console: 0 */
     console.info(`${LOG_PREFIX} re-caching page`, page);
+    console.info(`${LOG_SUFFIX}`);
   };
 
   /**
@@ -57,6 +62,7 @@ export function Debugger () {
   this.logShutdown = () => {
     /* eslint no-console: 0 */
     console.info(`${LOG_PREFIX} inactivity shutdown`);
+    console.info(`${LOG_SUFFIX}`);
   };
 
   /**
@@ -66,6 +72,7 @@ export function Debugger () {
   this.logWorkerWarning = () => {
     /* eslint no-console: 0 */
     console.info(`${LOG_PREFIX} web-worker functionality not suppported`);
+    console.info(`${LOG_SUFFIX}`);
   };
 
   /**

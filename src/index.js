@@ -1,5 +1,6 @@
 import { FingerprintUtils } from './utils/fingeprint';
 import { PagingUtils } from './utils/paging';
+import { CacheUtils } from './utils/cache';
 import { UrlUtils } from './utils/url';
 import { XhrUtils } from './utils/xhr';
 import { Debugger } from './debugger';
@@ -35,9 +36,16 @@ export const PagePreloader = {
    * @returns {void}
    */
   init (ops = {}) {
-    /* eslint max-len: 0 */
     /* eslint max-params: 0 */
-    let workerFn = (settings, Debug, UrlHelper, XhrHelper, PagingHelper, FingerprintHelper) => {
+    let workerFn = (
+      settings,
+      Debug,
+      UrlHelper,
+      XhrHelper,
+      CacheHelper,
+      PagingHelper,
+      FingerprintHelper
+    ) => {
       // default request page
       let requestPage = 1;
 
@@ -47,6 +55,7 @@ export const PagePreloader = {
       // helpers
       const fingerprintUtils = new FingerprintHelper();
       const pagingUtils = new PagingHelper();
+      const cacheUtils = new CacheHelper();
       const urlUtils = new UrlHelper();
       const xhrUtils = new XhrHelper();
       const debug = new Debug();
@@ -63,49 +72,7 @@ export const PagePreloader = {
       // extend options
       options = Object.assign(options, settings);
 
-      /**
-       * Supervisor to keep data up-to-date
-       * @returns {void}
-       */
-      let supervisePagingData = () => {
-        (function _cache () {
-          setTimeout(() => {
-            /* eslint no-unused-expressions: 0 */
-            options.debug && debug.logCacheAttempt();
-
-            // store fingerprint to represent current state of the store
-            fingerprintUtils.update(store);
-
-            //
-            if (fingerprintUtils.getTicks() > options.maxInactivityTicks) {
-              self.postMessage({ action: 'CLEAR_STORE' });
-              /* eslint no-unused-expressions: 0 */
-              options.debug && debug.logShutdown();
-              store = {};
-
-              return;
-            }
-
-            for (let endPoint in store) {
-              let data = store[endPoint];
-
-              /* eslint max-len: 0 */
-              if (xhrUtils.isRequestRecacheable(data.page, data.loadTime, options.cacheDuration)) {
-                /* eslint max-len: 0 */
-                xhrUtils.pollRemoteSource(data.target, endPoint, data.page, data.requestPage);
-
-                /* eslint no-unused-expressions: 0 */
-                options.debug && debug.logUrlRequest(data.target);
-                options.debug && debug.logPageCache(data.page);
-              }
-            }
-
-            _cache();
-          }, options.cacheDuration);
-        })();
-      };
-
-      // -- set data id (identificator)
+      // set data id (identificator)
       xhrUtils.setPreloadKey(options.preloadKey);
 
       // set messaging fn
@@ -116,14 +83,30 @@ export const PagePreloader = {
         // reload store and do not proceed
         if (event.data && event.data.action === 'RELOAD_STORE') {
           store = event.data.store;
+          cacheUtils.setStore(store);
           /* eslint no-unused-expressions: 0 */
           options.debug && debug.logStoreUpdate(store);
 
           return;
         }
 
+        // reset store and do not proceed
+        if (event.data && event.data.action === 'RESET_STORE') {
+          store = {};
+
+          return;
+        }
+
         // we have a brand-new store so supervise it
-        !Object.keys(store || {}).length && supervisePagingData();
+        !Object.keys(store || {}).length && (() => {
+          cacheUtils.setStore(store)
+          cacheUtils.setDebug(options.debug)
+          cacheUtils.setMessenger(self.postMessage)
+          cacheUtils.setExpiration(options.cacheDuration)
+          cacheUtils.setMaxInactivityTicks(options.maxInactivityTicks)
+
+          cacheUtils.supervise(debug, fingerprintUtils, xhrUtils);
+        })()
 
         // extract current page or default to 1
         requestPage = pagingUtils.extractCurrentPage(event);
@@ -166,6 +149,7 @@ export const PagePreloader = {
             ${Debugger},
             ${UrlUtils.toString()},
             ${XhrUtils.toString()},
+            ${CacheUtils.toString()},
             ${PagingUtils.toString()},
             ${FingerprintUtils.toString()}
           )
@@ -195,6 +179,7 @@ export const PagePreloader = {
 
     _worker.onmessage = (event) => {
       if (event.data.action === 'CLEAR_STORE') {
+        _worker.postMessage({ action: 'RESET_STORE' });
         window.__preloadedData = {};
 
         return;
