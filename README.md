@@ -11,7 +11,7 @@
   
 </div>
 
-A simple page preloader using dedicated web worker.
+A simple page preloader using a dedicated web worker.
 
 <h2 align="center">Install</h2>
 
