@@ -33,6 +33,25 @@ Example usage:
 // use default options
 PagePreloader.init()
 
+PagePreloader.query(origin, endPoint)
+// - origin (eg. location.origin) - base url (https://www.foo.baz) to request
+// - endPoint - actual requested page fragment (/api/product/find?id=1&page=2)
+// Final requested page then: https://www.foo.baz/api/product/find?id=1&page=2
+
+window.__preloadedData
+// Preloaded data are available inside this global variable
+// You should negotiate this object before requesting new page
+```
+
+## :memo: Documentation
+
+
+### `PagePreloader.init(options)`
+Initializes internal flow of code.
+
+Usage:
+
+```js
 // use custom options
 PagePreloader.init({
     debug: false, 
@@ -58,17 +77,14 @@ PagePreloader.init({
     // max attempts before shutdown
     // one attempt/tick is recorded whenever preloaded history remains unchanged
 })
-
-PagePreloader.query(origin, endPoint)
-// - origin (eg. location.origin) - base url (https://www.foo.baz) to request
-// - endPoint - actual requested page fragment (/api/product/find?id=1&page=2)
-// Final requested page then: https://www.foo.baz/api/product/find?id=1&page=2
-
-window.__preloadedData
-// Preloaded data are available inside this global variable
-// You should negotiate this object before requesting new page
 ```
 
+#### Params
+
+- **object** `options`: Configuration object.
+
+#### Return
+- **void**
 
 <h2 align="center">LICENSE</h2>
 
