@@ -27,20 +27,20 @@ import { PagePreloader } from 'page-preloader';
 let { PagePreloader } = require('page-preloader')
 ```
 
-Example usage:
+## :clipboard: Example
 
 ``` javascript
 // use default options
 PagePreloader.init()
 
 PagePreloader.query(origin, endPoint)
-// - origin (eg. location.origin) - base url (https://www.foo.baz) to request
-// - endPoint - actual requested page fragment (/api/product/find?id=1&page=2)
-// Final requested page then: https://www.foo.baz/api/product/find?id=1&page=2
+// - origin (eg. https://www.foo.baz) - base url to request
+// - endPoint - fragment to request (eg. /api/product/find?id=1&page=2)
+// Final requested page to be used internallly then: https://www.foo.baz/api/product/find?id=1&page=2
 
 window.__preloadedData
 // Preloaded data are available inside this global variable
-// You should negotiate this object before requesting new page
+// You should negotiate this object before requesting raw data for a new page
 ```
 
 ## :memo: Documentation
@@ -52,30 +52,25 @@ Initializes internal flow of code.
 Usage:
 
 ```js
-// use custom options
 PagePreloader.init({
-    debug: false, 
-    // defaults to 'false'
-    // turn on/off debug mode
+    debug: false, // default
+    // Turns debug mode on or off.
     
-    preloadKey: 'uri', 
-    // defaults to 'uri'
-    // determine key under which to store preloaded data
-    // - 'uri' - data to be stored using URI string as key
-    // - 'page' - data to be stored using page number as key
+    preloadKey: 'uri', // default
+    // Saves preloaded data for a certain page under this key.
+    // - 'uri' - saves data using URI string. Example: { '/api/product?id=1&page=1': ..data.. }
+    // - 'page' - saves data using page number. Example: { 1: ..data.. }
     
-    preloadDelay: 2000,
-    // defaults to '2000'
-    // [ms] when to start preloading following every page request
+    preloadDelay: 2000, // default
+    // Determines delay in [ms] after which to start preloading.
     
-    cacheDuration: 60000,
-    // defaults to '60000'
-    // [ms] when to request/refresh data
+    cacheDuration: 60000, // default
+    // Determines cache duration in [ms] for preloaded data
+    // Once the duration period expires, data are requested again.
     
-    maxInactivityTicks: 20, 
-    // defaults to '20'
-    // max attempts before shutdown
-    // one attempt/tick is recorded whenever preloaded history remains unchanged
+    maxInactivityTicks: 20, // default
+    // Determines ticks for inactivity period.
+    // One tick expires whenever preloaded page history remains unchanged following cache expiration.
 })
 ```
 
