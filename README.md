@@ -13,30 +13,25 @@
 
 A simple page preloader using a dedicated web worker.
 
-<h2 align="center">Install</h2>
+## :cloud: Installation
 
 ```
 npm install page-preloader
 ```
 
-<h2 align="center">Usage</h2>
-
-``` javascript
-import { PagePreloader } from 'page-preloader';
-// or
-let { PagePreloader } = require('page-preloader')
-```
-
 ## :clipboard: Example
 
 ``` javascript
+import { PagePreloader } from 'page-preloader';
+// let { PagePreloader } = require('page-preloader')
+
 // use default options
 PagePreloader.init()
 
 PagePreloader.query(origin, endPoint)
-// - origin (eg. https://www.foo.baz) - base url to request
-// - endPoint - fragment to request (eg. /api/product/find?id=1&page=2)
-// Final requested page to be used internallly then: https://www.foo.baz/api/product/find?id=1&page=2
+// Requested resource base URL (eg. https://www.example.com).
+// Requested resource end-point (eg. /api/product/find?id=1&page=1).
+// The result URL to be used internallly then: https://www.example.com/api/product/find?id=1&page=1
 
 window.__preloadedData
 // Preloaded data are available inside this global variable
@@ -77,6 +72,23 @@ PagePreloader.init({
 #### Params
 
 - **object** `options`: Configuration object.
+
+#### Return
+- **void**
+
+### `PagePreloader.query(origin, endPoint)`
+Queries requested resource.
+
+Usage:
+
+```js
+PagePreloader.query(origin, endPoint)
+```
+
+#### Params
+
+- **string** `origin`: Requested resource base URL (eg. https://www.example.com).
+- **string** `endPoint`: Requested resource end-point (eg. /api/product/find?id=1&page=1).
 
 #### Return
 - **void**
