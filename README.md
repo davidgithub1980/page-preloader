@@ -28,10 +28,7 @@ import { PagePreloader } from 'page-preloader';
 // use default options
 PagePreloader.init()
 
-PagePreloader.query(origin, endPoint)
-// Requested resource base URL (eg. https://www.example.com).
-// Requested resource end-point (eg. /api/product/find?id=1&page=1).
-// The result URL to be used internallly then: https://www.example.com/api/product/find?id=1&page=1
+PagePreloader.query("https://www.example.com", "/api/products?page=1&category=baz")
 
 window.__preloadedData
 // Preloaded data are available inside this global variable
@@ -53,7 +50,7 @@ PagePreloader.init({
     
     preloadKey: 'uri', // default
     // Saves preloaded data for a certain page under this key.
-    // - 'uri' - saves data using URI string. Example: { '/api/product?id=1&page=1': ..data.. }
+    // - 'uri' - saves data using URI string. Example: { '/api/products?page=1': ..data.. }
     // - 'page' - saves data using page number. Example: { 1: ..data.. }
     
     preloadDelay: 2000, // default
@@ -88,10 +85,21 @@ PagePreloader.query(origin, endPoint)
 #### Params
 
 - **string** `origin`: Requested resource base URL (eg. https://www.example.com).
-- **string** `endPoint`: Requested resource end-point (eg. /api/product/find?id=1&page=1).
+- **string** `endPoint`: Requested resource end-point (eg. /api/products?page=1&category=baz).
 
 #### Return
 - **void**
+
+### `window.__preloadedData`
+Container for preloaded data.
+
+Usage:
+
+```js
+window.__preloadedData
+// Preloaded data are available inside this global variable
+// You should negotiate this object before requesting raw data for a new page
+```
 
 <h2 align="center">LICENSE</h2>
 
