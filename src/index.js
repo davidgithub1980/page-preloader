@@ -70,7 +70,7 @@ export const PagePreloader = {
       };
 
       // extend options
-      options = Object.assign(options, settings);
+      options = {...options, ...settings};
 
       // set data id (identificator)
       xhrUtils.setPreloadKey(options.preloadKey);
