@@ -10,8 +10,8 @@
   ],
   "scripts": {
     "test": "jest",
-    "lint": "node_modules/.bin/goodparts src/* --fix",
-    "transpile": "node node_modules/babel-cli/bin/babel.js src --out-dir lib",
+    "lint": "goodparts src/* --fix",
+    "transpile": "babel src --out-dir lib",
     "prepublishOnly": "npm run lint && npm run transpile"
   },
   "author": "David Zaba",
@@ -30,6 +30,7 @@
     "babel-eslint": "^8.2.6",
     "babel-jest": "^23.4.2",
     "babel-plugin-transform-es2015-modules-simple-commonjs": "^0.3.0",
+    "babel-plugin-transform-object-assign": "^6.22.0",
     "babel-plugin-transform-object-rest-spread": "^6.26.0",
     "babel-preset-env": "^1.7.0",
     "eslint": "^5.4.0",
@@ -42,7 +43,8 @@
     ],
     "plugins": [
       "transform-object-rest-spread",
-      "transform-es2015-modules-simple-commonjs"
+      "transform-es2015-modules-simple-commonjs",
+      "transform-object-assign"
     ]
   },
   "jest": {
