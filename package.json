@@ -1,6 +1,6 @@
 {
   "name": "page-preloader",
-  "version": "1.2.42",
+  "version": "1.2.43",
   "description": "Preload pages via web worker",
   "main": "lib/index.js",
   "keywords": [
