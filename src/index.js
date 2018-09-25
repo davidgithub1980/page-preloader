@@ -1,5 +1,6 @@
 import { FingerprintUtils } from './utils/fingeprint';
 import { PagingUtils } from './utils/paging';
+import { ObjectUtils } from './utils/object';
 import { CacheUtils } from './utils/cache';
 import { UrlUtils } from './utils/url';
 import { XhrUtils } from './utils/xhr';
@@ -44,6 +45,7 @@ export const PagePreloader = {
       XhrHelper,
       CacheHelper,
       PagingHelper,
+      ObjectHelper,
       FingerprintHelper
     ) => {
       // default request page
@@ -55,6 +57,7 @@ export const PagePreloader = {
       // helpers
       const fingerprintUtils = new FingerprintHelper();
       const pagingUtils = new PagingHelper();
+      const objectUtils = new ObjectHelper();
       const cacheUtils = new CacheHelper();
       const urlUtils = new UrlHelper();
       const xhrUtils = new XhrHelper();
@@ -70,7 +73,7 @@ export const PagePreloader = {
       };
 
       // extend options
-      options = {...options, ...settings};
+      options = objectUtils.assign(options, settings)
 
       // set data id (identificator)
       xhrUtils.setPreloadKey(options.preloadKey);
@@ -99,14 +102,14 @@ export const PagePreloader = {
 
         // we have a brand-new store so supervise it
         !Object.keys(store || {}).length && (() => {
-          cacheUtils.setStore(store);
-          cacheUtils.setDebug(options.debug);
-          cacheUtils.setMessenger(self.postMessage);
-          cacheUtils.setExpiration(options.cacheDuration);
-          cacheUtils.setMaxInactivityTicks(options.maxInactivityTicks);
+          cacheUtils.setStore(store)
+          cacheUtils.setDebug(options.debug)
+          cacheUtils.setMessenger(self.postMessage)
+          cacheUtils.setExpiration(options.cacheDuration)
+          cacheUtils.setMaxInactivityTicks(options.maxInactivityTicks)
 
           cacheUtils.supervise(debug, fingerprintUtils, xhrUtils);
-        })();
+        })()
 
         // extract current page or default to 1
         requestPage = pagingUtils.extractCurrentPage(event);
@@ -151,6 +154,7 @@ export const PagePreloader = {
             ${XhrUtils.toString()},
             ${CacheUtils.toString()},
             ${PagingUtils.toString()},
+            ${ObjectUtils.toString()},
             ${FingerprintUtils.toString()}
           )
         `],
@@ -186,7 +190,6 @@ export const PagePreloader = {
       }
 
       let { id, requestPage } = event.data;
-
       window.__preloadedData[id] = { ...event.data };
       /* eslint max-len: 0 */
       window.__preloadedData = _PagingUtils.refreshContext(requestPage, window.__preloadedData);
